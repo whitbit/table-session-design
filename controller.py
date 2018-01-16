@@ -3,17 +3,17 @@ from uuid import uuid4
 
 class Session(object):
 
-    def __init__(self, session_id, session_start, session_end):
-        self.session_id = session_id
-        self.session_start = session_start
-        self.session_end = session_end
+    def __init__(self, sesh_id, start, end):
+        self.id = sesh_id
+        self.start = start
+        self.end = end
 
 
 class Event(object):
 
     event_types = ['check_open', 'check_close', 'swipe', 'touch']
 
-    def __init__(self, name, timeout=None):
+    def __init__(self, name, timeout=-1):
         self.name = name
         self.timeout = timeout
 
@@ -41,36 +41,19 @@ class SessionController(object):
 
         """
 
-        #Handles new session cases if no session exists or if session expired.
-        if self.session == None or self.session.session_end < timestamp:
-            if event.name == 'check_open':
-                self.session = Session(uuid4(), timestamp, -1)
-            if event.name == 'swipe' or event.name == 'touch':
-                self.session = Session(uuid4(), timestamp, event.timeout)
-            
-            self.all_sessions.append(self.session)
-            
-            return True
-
-        """
-        Handles extending session with check-open.
-        """
-        if event.name == 'check_open':
-            self.session.session_end = -1
-
-
-        # Handles extending session if session is not in check open state
-        # and new event timeout is later than existing session timeout.
-        if (self.session.session_end is not -1) \
-            and (self.session.session_end < timestamp + event.timeout):
-            self.session.session_end = timestamp + event.timeout
-        
         if event.name == 'check_close':
-            print 'HERE'
-            self.session.session_end = timestamp
+            self.session.end = timestamp
 
-        return False
-        
+
+        new_event_end = timestamp + event.timeout
+        if self.session:
+            if self.session.end < new_event_end:
+                self.session.end = new_event_end
+            return False
+
+        self.session = Session(uuid4(), timestamp, new_event_end)
+
+        return True
 
     def get_current_session(self):
         """

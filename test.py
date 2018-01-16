@@ -15,11 +15,11 @@ class SessionTestCase(unittest.TestCase):
         """
         Submits touch event and asserts session is in progress.
         """
-        
+
         self.assertEqual(self.test_session.add_event(self.touch_1, 5), True)
         self.assertIsNotNone(self.test_session.get_current_session())
 
-    def testOverlappingTouches(self):
+    def testOverlappingTouches1(self):
         """
         Submits two overlapping touch events,
         with the second event ending after the first.
@@ -28,20 +28,20 @@ class SessionTestCase(unittest.TestCase):
         self.test_session.add_event(self.touch_1, 4)
         self.test_session.add_event(self.touch_2, 9)
 
-        self.assertEqual(self.test_session.session.session_start, 4)
-        self.assertEqual(self.test_session.session.session_end, 14)
+        self.assertEqual(self.test_session.session.start, 4)
+        self.assertEqual(self.test_session.session.end, 14)
 
     def testOverlappingTouches2(self):
         """
         Submits two overlapping touch events,
         with the second event ending before the first.
         """
-
         self.test_session.add_event(self.touch_1, 4)
+        print self.test_session.session.end
         self.test_session.add_event(self.touch_2, 5)
 
-        self.assertEqual(self.test_session.session.session_start, 4)
-        self.assertEqual(self.test_session.session.session_end, 10)
+        self.assertEqual(self.test_session.session.start, 4)
+        self.assertEqual(self.test_session.session.end, 14)
 
     def testCheckOpenCheckClose(self):
         """
@@ -50,10 +50,10 @@ class SessionTestCase(unittest.TestCase):
         self.test_session.add_event(self.check_open, 19)
         
         # checks current session id after opening a check
-        session_id = self.test_session.session.session_id
+        session_id = self.test_session.session.id
 
         # checks that current session ends at infinite time
-        self.assertEqual(self.test_session.session.session_end, -1)
+        self.assertEqual(self.test_session.session.end, -1)
 
         # closes session with check close and checks that it's the same previous session
         # self.test_session.add_event(self.check_close, 100)
