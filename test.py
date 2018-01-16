@@ -13,15 +13,29 @@ class SessionTestCase(unittest.TestCase):
 
     def testTouchEvent(self):
         """
-        Submits touch event and asserts session is in progress.
+        Adds touch event and asserts session is in progress.
         """
 
         self.assertEqual(self.test_session.add_event(self.touch_1, 5), True)
         self.assertIsNotNone(self.test_session.get_current_session())
 
+    def testExpiredEvent(self):
+        """
+        Adds event after previous session has expired and asserts that previous
+        session not in progress. New session instantiated.
+        """
+
+        self.test_session.add_event(self.touch_1, 5)
+        prev_session_id = self.test_session.session.id
+        print 'END', self.test_session.session.end
+        self.test_session.add_event(self.touch_1, 16)
+        print 'START', self.test_session.session.start
+        print 'END AFTER', self.test_session.session.end
+        print prev_session_id == self.test_session.session.id
+
     def testOverlappingTouches1(self):
         """
-        Submits two overlapping touch events,
+        Adds two overlapping touch events,
         with the second event ending after the first.
         """
 
@@ -33,27 +47,29 @@ class SessionTestCase(unittest.TestCase):
 
     def testOverlappingTouches2(self):
         """
-        Submits two overlapping touch events,
+        Adds two overlapping touch events,
         with the second event ending before the first.
         """
         self.test_session.add_event(self.touch_1, 4)
-        print self.test_session.session.end
         self.test_session.add_event(self.touch_2, 5)
 
         self.assertEqual(self.test_session.session.start, 4)
         self.assertEqual(self.test_session.session.end, 14)
 
+    def testCheckOpen(self):
+        pass
+
     def testCheckOpenCheckClose(self):
         """
         Opens a session with check_open. Wait for long time.
         """
-        self.test_session.add_event(self.check_open, 19)
+        # self.test_session.add_event(self.check_open, 19)
         
-        # checks current session id after opening a check
-        session_id = self.test_session.session.id
+        # # checks current session id after opening a check
+        # session_id = self.test_session.session.id
 
-        # checks that current session ends at infinite time
-        self.assertEqual(self.test_session.session.end, -1)
+        # # checks that current session ends at infinite time
+        # self.assertEqual(self.test_session.session.end, -1)
 
         # closes session with check close and checks that it's the same previous session
         # self.test_session.add_event(self.check_close, 100)

@@ -40,19 +40,20 @@ class SessionController(object):
         Or extends session and returns False.
 
         """
-
-        if event.name == 'check_close':
-            self.session.end = timestamp
-
-
         new_event_end = timestamp + event.timeout
+        
         if self.session:
-            if self.session.end < new_event_end:
+            if event.name == 'check_close':
+                self.session.end = timestamp
+            if event.name == 'check_open':
+                self.session.end = event.timeout
+            if (self.session.end > timestamp
+                and self.session.end < new_event_end):
                 self.session.end = new_event_end
             return False
 
         self.session = Session(uuid4(), timestamp, new_event_end)
-
+        self.all_sessions.append(self.session)
         return True
 
     def get_current_session(self):
