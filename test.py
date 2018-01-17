@@ -27,16 +27,18 @@ class SessionTestCase(unittest.TestCase):
         """
         Adds touch event with set time and asserts session is in progress.
         Asserts session end time.
+
         """
-        self.test_session.add_event(self.touch_1, 5)
+        self.test_session.add_event(self.touch_2, 5)
         
         self.assertIsNotNone(self.test_session.session)
-        self.assertEqual(self.test_session.session.end, 15)
+        self.assertEqual(self.test_session.session.end, 10)
 
     def testExpiredEvent(self):
         """
         Adds event after previous session has expired and asserts that previous
         session not in progress. New session instantiated.
+
         """
         self.test_session.add_event(self.touch_1, 3)
         prev_session = self.test_session.session
@@ -49,6 +51,7 @@ class SessionTestCase(unittest.TestCase):
         """
         Adds two overlapping touch events,
         with the second event ending after the first.
+
         """
 
         self.test_session.add_event(self.touch_1, 4)
@@ -61,7 +64,9 @@ class SessionTestCase(unittest.TestCase):
         """
         Adds two overlapping touch events,
         with the second event ending before the first.
+
         """
+
         self.test_session.add_event(self.touch_1, 4)
         self.test_session.add_event(self.touch_2, 5)
 
@@ -70,8 +75,11 @@ class SessionTestCase(unittest.TestCase):
 
     def testCheckOpenClose(self):
         """
-        Adds check open event, asserts that check closes at -1
-        until check close event happens.
+        Adds check open event, asserts that check ends at -1
+        until check close event occurs.
+
+        Asserts that open and close events are on the same session.
+
         """
         
         self.test_session.add_event(self.check_open, 0)
@@ -84,6 +92,19 @@ class SessionTestCase(unittest.TestCase):
 
         self.assertEqual(self.test_session.session.end, 6)
         self.assertEqual(open_session, self.test_session.session)
+
+    def testAllSessions(self):
+        """
+        Checks that mutiple sessions are added to session controller.
+
+        """
+
+        self.test_session.add_event(self.touch_1, 5)
+        self.test_session.add_event(self.touch_1, 15)
+        self.test_session.add_event(self.touch_1, 30)
+        self.test_session.add_event(self.touch_1, 45)
+
+        self.assertEqual(len(self.test_session.all_sessions), 4)
 
 
 if __name__ == '__main__':
