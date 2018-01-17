@@ -73,6 +73,26 @@ class SessionTestCase(unittest.TestCase):
         self.assertEqual(self.test_session.session.start, 4)
         self.assertEqual(self.test_session.session.end, 14)
 
+    def testOverlappingOpenTouch(self):
+        """
+        Touch after open event.
+        """
+
+        self.test_session.add_event(self.check_open, 5)
+        self.test_session.add_event(self.touch_1, 10)
+
+        self.assertEqual(self.test_session.session.end, -1)
+
+    def testOverlappingCloseandTouch(self):
+        """
+        Session that ends with touch event instead of check event.
+
+        """
+        self.test_session.add_event(self.touch_1, 5)
+        self.test_session.add_event(self.check_close, 10)
+
+        self.assertEqual(self.test_session.session.end, 15)
+
     def testCheckOpenClose(self):
         """
         Adds check open event, asserts that check ends at -1
@@ -93,9 +113,10 @@ class SessionTestCase(unittest.TestCase):
         self.assertEqual(self.test_session.session.end, 6)
         self.assertEqual(open_session, self.test_session.session)
 
+
     def testAllSessions(self):
         """
-        Checks that mutiple sessions are added to session controller.
+        Mutiple sessions are added to session controller.
 
         """
 

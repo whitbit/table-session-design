@@ -48,7 +48,7 @@ class SessionController(object):
 
         if self.session \
            and (self.session.end > timestamp or self.session.end == -1):
-            if event.name == 'check_close':
+            if event.name == 'check_close' and self.session.end < timestamp:
                 self.session.end = timestamp
             if event.name == 'check_open':
                 self.session.end = -1
