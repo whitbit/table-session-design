@@ -83,6 +83,16 @@ class SessionTestCase(unittest.TestCase):
 
         self.assertEqual(self.test_session.session.end, -1)
 
+    def testOverlappingTouchOpen(self):
+        """
+        Open after touch event.
+        """
+
+        self.test_session.add_event(self.touch_1, 10)
+        self.test_session.add_event(self.check_open, 5)
+
+        self.assertEqual(self.test_session.session.end, -1)
+
     def testOverlappingCloseandTouch(self):
         """
         Session that ends with touch event instead of check event.

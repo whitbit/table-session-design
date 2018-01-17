@@ -27,7 +27,7 @@ class Event(object):
         else:
             self._name = name
 
-
+@Singleton
 class SessionController(object):
 
     def __init__(self):
@@ -41,11 +41,12 @@ class SessionController(object):
         Or extends session and returns False.
 
         """
-
-        new_event_end = timestamp + event.timeout
+        if event.name == 'check_open':
+            new_event_end = -1
+        else:
+            new_event_end = timestamp + event.timeout
 
         is_created = False
-
         if self.session \
            and (self.session.end > timestamp or self.session.end == -1):
             if event.name == 'check_close' and self.session.end < timestamp:
@@ -58,7 +59,6 @@ class SessionController(object):
             return is_created
 
         is_created = True
-
         self.session = Session(uuid4(), timestamp, new_event_end)
         self.all_sessions.append(self.session)
         
