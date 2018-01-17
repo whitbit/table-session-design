@@ -1,5 +1,6 @@
 import operator
 from uuid import uuid4
+from datetime import datetime
 
 class Session(object):
 
@@ -40,21 +41,29 @@ class SessionController(object):
         Or extends session and returns False.
 
         """
+
         new_event_end = timestamp + event.timeout
-        
-        if self.session:
+
+        is_created = False
+
+        if self.session \
+           and (self.session.end > timestamp or self.session.end == -1):
             if event.name == 'check_close':
                 self.session.end = timestamp
             if event.name == 'check_open':
-                self.session.end = event.timeout
+                self.session.end = -1
             if (self.session.end > timestamp
                 and self.session.end < new_event_end):
                 self.session.end = new_event_end
-            return False
+            return is_created
+
+        is_created = True
 
         self.session = Session(uuid4(), timestamp, new_event_end)
         self.all_sessions.append(self.session)
-        return True
+        
+        return is_created
+
 
     def get_current_session(self):
         """

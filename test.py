@@ -1,6 +1,6 @@
 import unittest
 from controller import Session, Event, SessionController
-
+from datetime import datetime, timedelta
 
 class SessionTestCase(unittest.TestCase):
 
@@ -11,27 +11,39 @@ class SessionTestCase(unittest.TestCase):
         self.check_open = Event('check_open')
         self.check_close = Event('check_close')
 
-    def testTouchEvent(self):
+    def testTouchEvent1(self):
         """
-        Adds touch event and asserts session is in progress.
-        """
+        Adds touch event with default time and asserts session is in progress.
+        Asserts session end time.
 
-        self.assertEqual(self.test_session.add_event(self.touch_1, 5), True)
-        self.assertIsNotNone(self.test_session.get_current_session())
+        """
+        self.test_session.add_event(self.touch_1, 5)
+        start_time = self.test_session.session.start
+
+        self.assertIsNotNone(self.test_session.session)
+        self.assertEqual(self.test_session.session.end, 15)
+
+    def testTouchEvent2(self):
+        """
+        Adds touch event with set time and asserts session is in progress.
+        Asserts session end time.
+        """
+        self.test_session.add_event(self.touch_1, 5)
+        
+        self.assertIsNotNone(self.test_session.session)
+        self.assertEqual(self.test_session.session.end, 15)
 
     def testExpiredEvent(self):
         """
         Adds event after previous session has expired and asserts that previous
         session not in progress. New session instantiated.
         """
+        self.test_session.add_event(self.touch_1, 3)
+        prev_session = self.test_session.session
+        
+        self.test_session.add_event(self.touch_2, 15)
 
-        self.test_session.add_event(self.touch_1, 5)
-        prev_session_id = self.test_session.session.id
-        print 'END', self.test_session.session.end
-        self.test_session.add_event(self.touch_1, 16)
-        print 'START', self.test_session.session.start
-        print 'END AFTER', self.test_session.session.end
-        print prev_session_id == self.test_session.session.id
+        self.assertNotEqual(prev_session, self.test_session.session)
 
     def testOverlappingTouches1(self):
         """
@@ -56,25 +68,22 @@ class SessionTestCase(unittest.TestCase):
         self.assertEqual(self.test_session.session.start, 4)
         self.assertEqual(self.test_session.session.end, 14)
 
-    def testCheckOpen(self):
-        pass
-
-    def testCheckOpenCheckClose(self):
+    def testCheckOpenClose(self):
         """
-        Opens a session with check_open. Wait for long time.
+        Adds check open event, asserts that check closes at -1
+        until check close event happens.
         """
-        # self.test_session.add_event(self.check_open, 19)
         
-        # # checks current session id after opening a check
-        # session_id = self.test_session.session.id
+        self.test_session.add_event(self.check_open, 0)
+        open_session = self.test_session.session
 
-        # # checks that current session ends at infinite time
-        # self.assertEqual(self.test_session.session.end, -1)
+        self.assertIsNotNone(self.test_session.session)
+        self.assertEqual(self.test_session.session.end, -1)
 
-        # closes session with check close and checks that it's the same previous session
-        # self.test_session.add_event(self.check_close, 100)
-        # self.assertEqual(self.test_session.session.session_end, 100)
-        # self.assertEqual(self.test_session.session.session_id, session_id)  
+        self.test_session.add_event(self.check_close, 6)
+
+        self.assertEqual(self.test_session.session.end, 6)
+        self.assertEqual(open_session, self.test_session.session)
 
 
 if __name__ == '__main__':
